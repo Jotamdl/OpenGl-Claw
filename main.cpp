@@ -1,6 +1,11 @@
 #include <GL/glut.h>
+#include <cmath>
+#include <initializer_list> // Para listas de inicialização
 #include <math.h>
 
+//---------------------------------- VARIÁVEIS E FUNÇÕES DA GARRA -----------------------------------
+
+// Variáveis da garra
 float anguloArticulacao1X = 0.0;
 float anguloArticulacao1Y = 0.0;
 float anguloArticulacao2X = 0.0;
@@ -11,326 +16,444 @@ float anguloArticulacao3Y = 0.0;
 float anguloPegada = 0.0;
 float pegar = false;
 
-float cameraAngleHorizontal = 0.0;
-float cameraAngleVertical = 0.0;
-float cameraDistance = 5.0;
-float cameraHeight = 0.0 ;
+// Limites para o ângulo de pegada
+const float ANGOLO_PEGADA_MAX = 75.0f;  // máximo de fechamento
+const float ANGOLO_PEGADA_MIN = 0.0f;   // mínimo ao abrir
 
 int sombraTipo = 0;
 
+// Variáveis do objeto (bloco vermelho)
+float objetoX = 1.0f;   
+float objetoY = 1.2f;   
+float objetoZ = 0.0f;
+bool objetoPegado = false;
 
-void inicializa() {
- glClearColor(0.0, 0.0, 0.0, 1.0);
- glEnable(GL_DEPTH_TEST);
-
- // ativar a iluminacao
- glEnable(GL_LIGHTING);
- glEnable(GL_LIGHT0);
-}
-
-void configuraIluminacao()
-{
- GLfloat luzAmbiente[] = {0.1, 0.1, 0.1, 1.0};   // luz suave
- GLfloat luzDifusa[]   = {1.0, 1.0, 1.0, 1.0};   // luz branca
- GLfloat luzPosicao[]  = {0.0, 0.0, 5.0, 1.0};   // luz pontual
-
- glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
- glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
- glLightfv(GL_LIGHT0, GL_POSITION, luzPosicao);
-}
-
-void configuraMaterial()
-{
- GLfloat materialDifuso[]    = {1.0, 0.0, 0.0, 1.0}; // vermelho
- GLfloat materialAmbiente[]  = {0.1, 0.0, 0.0, 1.0}; // vermelho escuro
- GLfloat materialEspecular[] = {0.5, 0.5, 0.5, 1.0}; // um pouco de brilho
-
- glMaterialfv(GL_FRONT, GL_DIFFUSE , materialDifuso   );
- glMaterialfv(GL_FRONT, GL_AMBIENT , materialAmbiente );
- glMaterialfv(GL_FRONT, GL_SPECULAR, materialEspecular);
-
- glMaterialf(GL_FRONT, GL_SHININESS, 20); // brilho medio
-}
-
+// função auxiliar para desenhar pirâmide usada nos "dedos"
 void solidPyramid(float height, float baseSize) {
-
-  // piramide
   glPushMatrix();
-    
     glBegin(GL_TRIANGLES);
       // face frontal
-      glVertex3f(-baseSize*0.5,        0.0,  baseSize*0.5);
-      glVertex3f( baseSize*0.5,        0.0,  baseSize*0.5);
-      glVertex3f(          0.0, height*1.0,           0.0);
+      glNormal3f(0.0, 0.5, 0.5);
+      glVertex3f(-baseSize*0.5f, 0.0f,  baseSize*0.5f);
+      glVertex3f( baseSize*0.5f, 0.0f,  baseSize*0.5f);
+      glVertex3f( 0.0f, height, 0.0f);
 
       // face direita
-      glVertex3f( baseSize*0.5,        0.0,  baseSize*0.5);
-      glVertex3f( baseSize*0.5,        0.0, -baseSize*0.5);
-      glVertex3f(          0.0, height*1.0,           0.0);
+      glNormal3f(0.5, 0.5, 0.0);
+      glVertex3f( baseSize*0.5f, 0.0f,  baseSize*0.5f);
+      glVertex3f( baseSize*0.5f, 0.0f, -baseSize*0.5f);
+      glVertex3f( 0.0f, height, 0.0f);
 
       // face traseira
-      glVertex3f( baseSize*0.5,        0.0, -baseSize*0.5);
-      glVertex3f(-baseSize*0.5,        0.0, -baseSize*0.5);
-      glVertex3f(          0.0, height*1.0,           0.0);
+      glNormal3f(0.0, 0.5, -0.5);
+      glVertex3f( baseSize*0.5f, 0.0f, -baseSize*0.5f);
+      glVertex3f(-baseSize*0.5f, 0.0f, -baseSize*0.5f);
+      glVertex3f( 0.0f, height, 0.0f);
 
       // face esquerda
-      glVertex3f(-baseSize*0.5,        0.0, -baseSize*0.5);
-      glVertex3f(-baseSize*0.5,        0.0,  baseSize*0.5);
-      glVertex3f(          0.0, height*1.0,           0.0);
-
+      glNormal3f(-0.5, 0.5, 0.0);
+      glVertex3f(-baseSize*0.5f, 0.0f, -baseSize*0.5f);
+      glVertex3f(-baseSize*0.5f, 0.0f,  baseSize*0.5f);
+      glVertex3f( 0.0f, height, 0.0f);
     glEnd();
 
-      // base
+    // base da pirâmide
     glBegin(GL_QUADS);
-      glVertex3f(-baseSize*0.5, 0.0,  baseSize*0.5);
-      glVertex3f( baseSize*0.5, 0.0,  baseSize*0.5);
-      glVertex3f( baseSize*0.5, 0.0, -baseSize*0.5);
-      glVertex3f(-baseSize*0.5, 0.0, -baseSize*0.5);
+      glNormal3f(0.0, -1.0, 0.0);
+      glVertex3f(-baseSize*0.5f, 0.0f,  baseSize*0.5f);
+      glVertex3f( baseSize*0.5f, 0.0f,  baseSize*0.5f);
+      glVertex3f( baseSize*0.5f, 0.0f, -baseSize*0.5f);
+      glVertex3f(-baseSize*0.5f, 0.0f, -baseSize*0.5f);
     glEnd();
-
   glPopMatrix();
 }
 
 void desenhaGarra(GLfloat raio) {
-  GLUquadricObj *quadratic;
-  quadratic = gluNewQuadric();
+  GLUquadricObj *quadratic = gluNewQuadric();
+  gluQuadricNormals(quadratic, GLU_SMOOTH);
+
+  // Materiais
+  GLfloat difusoBraco[] = {0.5f, 0.5f, 0.5f, 1.0f};
+  GLfloat ambienteBraco[] = {0.2f, 0.2f, 0.2f, 1.0f};
+  GLfloat especularBraco[] = {0.2f, 0.2f, 0.2f, 1.0f};
+
+  GLfloat difusoJunta[] = {0.4f, 0.4f, 0.4f, 1.0f};
+  GLfloat ambienteJunta[] = {0.15f, 0.15f, 0.15f, 1.0f};
+  GLfloat especularJunta[] = {0.1f, 0.1f, 0.1f, 1.0f};
+
+  GLfloat difusoDedos[] = {0.1f, 0.1f, 0.1f, 1.0f};
+  GLfloat ambienteDedos[] = {0.05f, 0.05f, 0.05f, 1.0f};
+  GLfloat especularDedos[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
   glPushMatrix();
-    // desenhando base
+    // Base da garra
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoBraco);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteBraco);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, especularBraco);
+    glMaterialf(GL_FRONT, GL_SHININESS, 20.0f);
+
+    // cilindro base
     glPushMatrix();
-      GLfloat baseDifusa[] = {1.0, 1.0, 0.0, 1.0};
-      GLfloat baseAmbiente[] = {0.2, 0.2, 0.0, 1.0};
-      glMaterialfv(GL_FRONT, GL_DIFFUSE, baseDifusa);
-      glMaterialfv(GL_FRONT, GL_AMBIENT, baseAmbiente);
-      glRotatef(90.0, 0.0, 1.0, 0.0);
-      glRotatef(90.0, 1.0, 0.0, 0.0);
+      glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+      glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
       gluCylinder(quadratic, 0.5, 0.5, 0.13, 20, 20);
     glPopMatrix();
     
-    // rotaciona articulacao maior
-    glRotatef(anguloArticulacao1X, 0.0, 1.0, 0.0);
-    glRotatef(anguloArticulacao1Y, 0.0, 0.0, 1.0);
-    // desenhando primeiro braço
+    // rotação articulação maior
+    glRotatef(anguloArticulacao1X, 0.0f, 1.0f, 0.0f);
+    glRotatef(anguloArticulacao1Y, 0.0f, 0.0f, 1.0f);
+
+    // primeiro braço + junta
+    // junta (esfera)
     glPushMatrix();
-      GLfloat bracoDifusa[] = {0.0, 1.0, 1.0, 1.0};
-      GLfloat bracoAmbiente[] = {0.0, 0.2, 0.2, 1.0};
-      glMaterialfv(GL_FRONT, GL_DIFFUSE, bracoDifusa);
-      glMaterialfv(GL_FRONT, GL_AMBIENT, bracoAmbiente);
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoJunta);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteJunta);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularJunta);
+      glMaterialf(GL_FRONT, GL_SHININESS, 10.0f);
       glutSolidSphere(0.13, 20, 20);
-      glRotatef(90.0, 0.0, 1.0, 0.0);
-      glRotatef(-90.0, 1.0, 0.0, 0.0);
+    glPopMatrix();
+
+    // braço (cilindro)
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoBraco);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteBraco);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, especularBraco);
+    glMaterialf(GL_FRONT, GL_SHININESS, 20.0f);
+    glPushMatrix();
+      glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+      glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
       gluCylinder(quadratic, 0.1, 0.1, 1.0, 20, 20);
     glPopMatrix();
-    glTranslatef(0.0, 1.0, 0.0);
+    glTranslatef(0.0f, 1.0f, 0.0f);
 
-    // rotaciona articulacao media
-    glRotatef(anguloArticulacao2X, 0.0, 1.0, 0.0);
-    glRotatef(anguloArticulacao2Y, 0.0, 0.0, 1.0);
-    // desenhando segundo braço
+    // rotação articulação média
+    glRotatef(anguloArticulacao2X, 0.0f, 1.0f, 0.0f);
+    glRotatef(anguloArticulacao2Y, 0.0f, 0.0f, 1.0f);
+
+    // segunda junta
     glPushMatrix();
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoJunta);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteJunta);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularJunta);
+      glMaterialf(GL_FRONT, GL_SHININESS, 10.0f);
       glutSolidSphere(0.13, 20, 20);
-      glRotatef(90.0, 0.0, 1.0, 0.0);
+    glPopMatrix();
+
+    // segundo braço
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoBraco);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteBraco);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, especularBraco);
+    glMaterialf(GL_FRONT, GL_SHININESS, 20.0f);
+    glPushMatrix();
+      glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
       gluCylinder(quadratic, 0.1, 0.1, 0.7, 20, 20);
     glPopMatrix();
-    glTranslatef(0.7, 0.0, 0.0);
+    glTranslatef(0.7f, 0.0f, 0.0f);
     
-    // rotaciona articulacao menor
-    glRotatef(anguloArticulacao3X, 0.0, 1.0, 0.0);
-    glRotatef(anguloArticulacao3Y, 0.0, 0.0, 1.0);
-    // desenhando articulação da mão
+    // rotação articulação menor
+    glRotatef(anguloArticulacao3X, 0.0f, 1.0f, 0.0f);
+    glRotatef(anguloArticulacao3Y, 0.0f, 0.0f, 1.0f);
+
+    // pulso
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoBraco);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteBraco);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, especularBraco);
+    glMaterialf(GL_FRONT, GL_SHININESS, 20.0f);
     glPushMatrix();
+      glScalef(0.2f, 0.2f, 0.2f);
+      glutSolidCube(1.0);
+    glPopMatrix();
+
+    // esfera da mão
+    glPushMatrix();
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoJunta);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteJunta);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularJunta);
+      glMaterialf(GL_FRONT, GL_SHININESS, 10.0f);
       glutSolidSphere(0.13, 20, 20);
     glPopMatrix();
     
-    // desenha dedo superior
+    // Dedos (material escuro)
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoDedos);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteDedos);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, especularDedos);
+    glMaterialf(GL_FRONT, GL_SHININESS, 0.0f);
+
+    // dedo superior
     glPushMatrix();
-      glRotatef(-anguloPegada, 0.0, 0.0, 1.0);
-      glTranslatef(0.0, 0.1, 0.0);
-      glRotatef(-20.0, 0.0, 0.0, 1.0);
-      solidPyramid(0.2, 0.07);
+      glRotatef(-anguloPegada, 0.0f, 0.0f, 1.0f);
+      glTranslatef(0.0f, 0.1f, 0.0f);
+      glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
+      solidPyramid(0.2f, 0.07f);
     glPopMatrix();
 
-    // desenha dedo inferior
+    // dedo inferior
     glPushMatrix();
-      glRotatef( anguloPegada, 0.0, 0.0, 1.0);
-      glTranslatef(0.0, -0.1, 0.0);
-      glRotatef(-160.0, 0.0, 0.0, 1.0);
-      solidPyramid(0.2, 0.07);
+      glRotatef(anguloPegada, 0.0f, 0.0f, 1.0f);
+      glTranslatef(0.0f, -0.1f, 0.0f);
+      glRotatef(-160.0f, 0.0f, 0.0f, 1.0f);
+      solidPyramid(0.2f, 0.07f);
     glPopMatrix();
     
-    // desenha dedo esquerdo
+    // dedo esquerdo
     glPushMatrix();
-      glRotatef(-anguloPegada, 0.0, 1.0, 0.0);
-      glTranslatef(0.0, 0.0, -0.1);
-      glRotatef(-90.0, 1.0, 0.0, 0.0);
-      glRotatef(-20.0 , 0.0, 0.0, 1.0);
-      solidPyramid(0.2, 0.07);
+      glRotatef(-anguloPegada, 0.0f, 1.0f, 0.0f);
+      glTranslatef(0.0f, 0.0f, -0.1f);
+      glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+      glRotatef(-20.0f , 0.0f, 0.0f, 1.0f);
+      solidPyramid(0.2f, 0.07f);
     glPopMatrix();
     
-    // desenha dedo direito
+    // dedo direito
     glPushMatrix();
-      glRotatef( anguloPegada, 0.0, 1.0, 0.0);
-      glTranslatef(0.0, 0.0, 0.1);
-      glRotatef( 90.0, 1.0, 0.0, 0.0);
-      glRotatef(-20.0, 0.0, 0.0, 1.0);
-      solidPyramid(0.2, 0.07);
+      glRotatef(anguloPegada, 0.0f, 1.0f, 0.0f);
+      glTranslatef(0.0f, 0.0f, 0.1f);
+      glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+      glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
+      solidPyramid(0.2f, 0.07f);
     glPopMatrix();
-    
+
+    // Se o objeto estiver pegado, desenha-lo aqui, para que acompanhe a garra
+    if (objetoPegado) {
+      GLfloat difObj[] = {0.8f, 0.1f, 0.1f, 1.0f};
+      GLfloat ambObj[] = {0.2f, 0.05f, 0.05f, 1.0f};
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difObj);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambObj);
+      glMaterialf(GL_FRONT, GL_SHININESS, 5.0f);
+
+      glPushMatrix();
+        // Desenha o bloco no referencial da garra (na palma da mão)
+        glTranslatef(0.0f, 0.0f, 0.0f); 
+        glutSolidCube(0.1f);
+      glPopMatrix();
+    }
+
   glPopMatrix();   
+  gluDeleteQuadric(quadratic);
+}
+
+float cameraAngleY = 0.0f; 
+float cameraAngleX = 0.0f; 
+float cameraDistance = 10.0f; 
+
+float mesaRotX = 0.0f;
+float mesaRotY = 0.0f;
+float mesaRotZ = 0.0f;
+
+void inicializa() {
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+
+    // Ativa iluminação
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    GLfloat luzAmbiente[] = {0.2f, 0.2f, 0.2f, 1.0f};
+    GLfloat luzDifusa[]   = {1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat posicaoLuz[]  = {10.0f, 10.0f, 10.0f, 1.0f};
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
+    glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz);
+
+    glShadeModel(GL_SMOOTH);
+}
+
+void desenhaMesa() {
+    GLfloat difusoMarrom[]    = {0.4f, 0.2f, 0.0f, 1.0f};
+    GLfloat ambienteMarrom[]  = {0.2f, 0.1f, 0.0f, 1.0f};
+    GLfloat especularMarrom[] = {0.0f, 0.0f, 0.0f, 1.0f}; 
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoMarrom);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteMarrom);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, especularMarrom);
+    glMaterialf(GL_FRONT, GL_SHININESS, 0.0f);
+
+    // Tampo da mesa
+    glPushMatrix();
+    glTranslatef(0.0f, 1.0f, 0.0f);
+    glScalef(4.0f, 0.2f, 2.0f);
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
+    // Pés da mesa
+    float tamPé = 0.2f; 
+    float alturaPé = 1.0f;
+
+    for (float x : std::initializer_list<float>{-1.7f, 1.7f}) {
+        for (float z : std::initializer_list<float>{-0.8f, 0.8f}) {
+            glPushMatrix();
+            glTranslatef(x, alturaPé / 2, z);
+            glScalef(tamPé, alturaPé, tamPé);
+            glutSolidCube(1.0f);
+            glPopMatrix();
+        }
+    }
+
+    // Desenhar o cubo sobre a mesa se não estiver pegado
+    if (!objetoPegado) {
+      GLfloat difObj[] = {0.8f, 0.1f, 0.1f, 1.0f};
+      GLfloat ambObj[] = {0.2f, 0.05f, 0.05f, 1.0f};
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difObj);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambObj);
+      glMaterialf(GL_FRONT, GL_SHININESS, 10.0f);
+
+      glPushMatrix();
+        glTranslatef(objetoX, objetoY, objetoZ); 
+        glutSolidCube(0.1f);
+      glPopMatrix();
+    }
+
+    // Desenhar a garra acima da mesa
+    glPushMatrix();
+      glTranslatef(0.0f, 1.243f, 0.0f); 
+      desenhaGarra(1.0f); 
+    glPopMatrix();
 }
 
 void display() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
 
-  float posX = cameraDistance * cos(cameraAngleHorizontal);
-  float posY = cameraDistance * sin(cameraAngleVertical);
-  float posZ = cameraDistance * sin(cameraAngleHorizontal);
+    float camX = cameraDistance * sinf(cameraAngleY * M_PI / 180.0f) * cosf(cameraAngleX * M_PI / 180.0f);
+    float camZ = cameraDistance * cosf(cameraAngleY * M_PI / 180.0f) * cosf(cameraAngleX * M_PI / 180.0f);
+    float camY = cameraDistance * sinf(cameraAngleX * M_PI / 180.0f);
+    gluLookAt(camX, camY, camZ, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
- // camera
- gluLookAt(posX, posY, posZ, // posicao da camera
-           0.0, 0.0, 0.0,    // ponto alvo da camera
-           0.0, 1.0, 0.0);   // rotacao da camera
+    glPushMatrix();
+    glRotatef(mesaRotX, 1.0f, 0.0f, 0.0f);
+    glRotatef(mesaRotY, 0.0f, 1.0f, 0.0f);
+    glRotatef(mesaRotZ, 0.0f, 0.0f, 1.0f);
+    desenhaMesa();
+    glPopMatrix();
 
- configuraIluminacao();
- configuraMaterial();
-
-//  if (sombraTipo == 0)
-//    glShadeModel(GL_FLAT);  // sombreamento plano (flat)
-
-//  if (sombraTipo == 1)
-//    glShadeModel(GL_SMOOTH);  // sombreamento suave (Gouraud)
-
-  desenhaGarra(1.0);
-
-  glutSwapBuffers();
+    glutSwapBuffers();
 }
 
-void reshape(int largura, int altura) {
- glViewport(0, 0, largura, altura);
+void reshape(int w, int h) {
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, (float)w / (float)h, 1.0, 100.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
 
- glMatrixMode(GL_PROJECTION);
- glLoadIdentity();
+void teclado(unsigned char tecla, int x, int y) {
+    const float incremento = 5.0f; 
 
- gluPerspective(45.0, (float)largura / (float)altura, 1.0, 100.0);
+    switch (tecla) {
+        case 'w': mesaRotX += incremento; break;
+        case 's': mesaRotX -= incremento; break;
+        case 'a': mesaRotY += incremento; break;
+        case 'd': mesaRotY -= incremento; break;
+        case 'q': mesaRotZ += incremento; break;
+        case 'e': mesaRotZ -= incremento; break;
+    }
 
- glMatrixMode(GL_MODELVIEW);
- glLoadIdentity();
+    if (tecla == '1')
+      sombraTipo = 0;
+    if (tecla == '2')
+      sombraTipo = 1;
+
+    // Tecla espaço alterna entre abrir e fechar a garra
+    if (tecla == 32) { 
+        pegar = !pegar;
+    }
+
+    if (tecla == 't') anguloArticulacao1Y += 1.0f; 
+    if (tecla == 'g') anguloArticulacao1Y -= 1.0f; 
+    if (tecla == 'h') anguloArticulacao1X -= 1.0f; 
+    if (tecla == 'f') anguloArticulacao1X += 1.0f; 
+    if (tecla == 'i') anguloArticulacao2Y += 1.0f;
+    if (tecla == 'k') anguloArticulacao2Y -= 1.0f;
+    if (tecla == 'l') anguloArticulacao2X -= 1.0f;
+    if (tecla == 'j') anguloArticulacao2X += 1.0f;
+
+    glutPostRedisplay();
+}
+
+void tecladoEspecial(int tecla, int x, int y) {
+    switch(tecla) {
+      case GLUT_KEY_UP:
+        anguloArticulacao3Y += 1.0f;
+        break;
+      case GLUT_KEY_DOWN:
+        anguloArticulacao3Y -= 1.0f;
+        break;
+      case GLUT_KEY_RIGHT:
+        anguloArticulacao3X += 1.0f;
+        break;
+      case GLUT_KEY_LEFT:
+        anguloArticulacao3X -= 1.0f;
+        break;  
+    }
+
+    glutPostRedisplay(); 
 }
 
 void atualiza(int valor) {
+  // Controla a abertura/fechamento da garra
   if (pegar) {
-    if (anguloPegada >= 75.0) anguloPegada = 75.0; 
-    anguloPegada += 1.0;
-  }
-  else {
-    if (anguloPegada <= 0.0) anguloPegada = 0.0; 
-    anguloPegada -= 1.0;
+    if (anguloPegada < ANGOLO_PEGADA_MAX) {
+      anguloPegada += 1.0f;
+      if (anguloPegada > ANGOLO_PEGADA_MAX) anguloPegada = ANGOLO_PEGADA_MAX;
+    }
+
+    // Se a garra está quase fechada, verificar se o objeto está próximo da garra
+    if (!objetoPegado && anguloPegada > 70.0f) {
+      // Checamos se o objeto está perto do centro da mão da garra (no momento posição fixa)
+      // A mão da garra está aproximadamente em X=1.9 se a garra estiver reta, mas aqui simplificamos.
+      // Já que o cubo está em (1.0, 1.2, 0.0) e a garra está no centro (0,1.243,0),
+      // Podemos verificar a distância em X e Z:
+      float dx = objetoX - 0.0f; // garra no centro x=0
+      float dy = objetoY - 1.243f; 
+      float dz = objetoZ - 0.0f;
+
+      float dist = sqrt(dx*dx + dy*dy + dz*dz);
+      // Se a distância for pequena o suficiente, consideramos o objeto capturado
+      // Ajuste conforme necessidade (aqui dist < 0.3 por exemplo)
+      if (dist < 0.3f) {
+        objetoPegado = true;
+      }
+    }
+
+  } else {
+    if (anguloPegada > ANGOLO_PEGADA_MIN) {
+      anguloPegada -= 1.0f;
+      if (anguloPegada < ANGOLO_PEGADA_MIN) anguloPegada = ANGOLO_PEGADA_MIN;
+    }
+
+    // Se a garra abriu totalmente, solta o objeto
+    if (anguloPegada <= ANGOLO_PEGADA_MIN && objetoPegado) {
+      objetoPegado = false;
+      // Quando solta, o objeto permanece na última posição da garra
+      // Para isso, vamos armazenar a posição da garra e atribuir ao objeto
+      // A garra está no centro, se a garra não se move em X/Z so mantemos?
+      // Nesse caso simplificado, a garra não se translada, então deixamos o objeto parado no local da garra
+      objetoX = 0.0f;
+      objetoY = 1.243f;
+      objetoZ = 0.0f;
+    }
   }
   
   glutPostRedisplay();
   glutTimerFunc(16, atualiza, 0);   
 }
 
-void teclado(unsigned char tecla, int x, int y) {
-  // controle de sombra
-  if (tecla == '1')
-    sombraTipo = 0;
-  if (tecla == '2')
-    sombraTipo = 1;
-
-  // controle da camera
-    // controle de distancia
-  if (tecla == 'q')   
-    cameraDistance -= 0.1; // move a camera para perto
-  if (tecla == 'e')   
-    cameraDistance += 0.1; // move a camera para longe
-    //controle de posaicao
-      // controle de posicao horizontal
-  if (tecla == 'a')   
-    cameraAngleHorizontal -= 0.1; // move a camera para esquerda
-  if (tecla == 'd')   
-    cameraAngleHorizontal += 0.1; // move a camera para direita
-      // controle de posicao vertical
-  if (tecla == 'w')   
-    cameraAngleVertical += 0.1; // move a camera para cima
-  if (tecla == 's')   
-    cameraAngleVertical -= 0.1; // move a camera para baixo
-  
-  // flag pra decidir se o braco deve ou nao fazer o movimento de pegar
-  if (tecla == 32) {
-      pegar = !pegar;
-  }
-  
-  // CONTROLES DO BRACO
-    // articulacao MAIOR
-  if (tecla == 't') {
-    anguloArticulacao1Y += 1.0; // move articulacao maior para cima
-  }
-  if (tecla == 'g') {
-    anguloArticulacao1Y -= 1.0; // move articulacao maior para baixo
-  }
-  if (tecla == 'h') {
-    anguloArticulacao1X -= 1.0; // move articulacao maior para direita
-  }
-  if (tecla == 'f') {
-    anguloArticulacao1X += 1.0; // move articulacao maior para esquerda
-  }
-    // articulacao MEDIA
-  if (tecla == 'i') {
-    anguloArticulacao2Y += 1.0; // move articulacao maior para cima
-  }
-  if (tecla == 'k') {
-    anguloArticulacao2Y -= 1.0; // move articulacao maior para baixo
-  }
-  if (tecla == 'l') {
-    anguloArticulacao2X -= 1.0; // move articulacao maior para direita
-  }
-  if (tecla == 'j') {
-    anguloArticulacao2X += 1.0; // move articulacao maior para esquerda
-  }
-
-  glutPostRedisplay();
-}
-
-void tecladoEspecial(int tecla, int x, int y) {
-  switch(tecla) {
-    // controle da articulação MENOR
-    case GLUT_KEY_UP:
-    anguloArticulacao3Y += 1.0;
-      break;
-    case GLUT_KEY_DOWN:
-    anguloArticulacao3Y -= 1.0;
-      break;
-    case GLUT_KEY_RIGHT:
-    anguloArticulacao3X += 1.0;
-      break;
-    case GLUT_KEY_LEFT:
-    anguloArticulacao3X -= 1.0;
-      break;
-    
-
-  }
-
-  glutPostRedisplay(); 
-}
-
 int main(int argc, char** argv) {
- glutInit(&argc, argv);
- glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
- glutInitWindowSize(800, 600);
- glutCreateWindow("Garra");
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Mesa 3D com Garra (Abrir/Fechar) e Objeto Capturável");
 
- inicializa();
+    inicializa();
 
- glutDisplayFunc(display);
- glutReshapeFunc(reshape);
- glutKeyboardFunc(teclado);
- glutSpecialFunc(tecladoEspecial);
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(teclado);
+    glutSpecialFunc(tecladoEspecial);
+    glutTimerFunc(1000, atualiza, 0);
 
- glutTimerFunc(1000, atualiza, 0);   
-  
- glutMainLoop();
-
- return 0;
+    glutMainLoop();
+    return 0;
 }
+
