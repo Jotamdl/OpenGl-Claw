@@ -345,8 +345,8 @@ void teclado(unsigned char tecla, int x, int y) {
         case 's': mesaRotX -= incremento; break;
         case 'a': mesaRotY += incremento; break;
         case 'd': mesaRotY -= incremento; break;
-        case 'q': mesaRotZ += incremento; break;
-        case 'e': mesaRotZ -= incremento; break;
+        case 'q': cameraDistance += incremento; break;
+        case 'e': cameraDistance -= incremento; break;
     }
 
     if (tecla == '1')
