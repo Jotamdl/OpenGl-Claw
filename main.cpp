@@ -32,7 +32,13 @@ float cameraHeight = 0.0 ;
 const float ANGOLO_PEGADA_MAX = 75.0f;  // máximo de fechamento
 const float ANGOLO_PEGADA_MIN = 0.0f;   // mínimo ao abrir
 
+// sombreamento
 int sombraTipo = 0;
+
+// variaveis de luz
+GLfloat luzAmbiente[] = {0.5f, 0.5f, 0.5f, 1.0f};
+GLfloat luzDifusa[]   = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat posicaoLuz[]  = {10.0f, 10.0f, 10.0f, 1.0f};
 
 // Variáveis do objeto (bloco vermelho)
 float objetoX = 1.0f;   
@@ -43,6 +49,19 @@ bool objetoPegado = false;
 // variavel para carregar texturas
 GLuint idsTextura[10];
 bool loadHouseTex = true;
+
+// Materiais
+GLfloat difusoBraco[]    = {0.7f, 0.7f, 0.7f, 1.0f};
+GLfloat ambienteBraco[]  = {0.6f, 0.6f, 0.6f, 1.0f};
+GLfloat especularBraco[] = {0.4f, 0.4f, 0.4f, 1.0f};
+
+GLfloat difusoJunta[]    = {0.4f, 0.4f, 0.4f, 1.0f};
+GLfloat ambienteJunta[]  = {0.15f, 0.15f, 0.15f, 1.0f};
+GLfloat especularJunta[] = {0.1f, 0.1f, 0.1f, 1.0f};
+
+GLfloat difusoDedos[]    = {0.1f, 0.1f, 0.1f, 1.0f};
+GLfloat ambienteDedos[]  = {0.05f, 0.05f, 0.05f, 1.0f};
+GLfloat especularDedos[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 void desenhaCirculo(float raio)
 {
@@ -172,19 +191,6 @@ void carregarTextura(const char* nomeArquivo, int indice) {
 void desenhaGarra(GLfloat raio) {
   GLUquadricObj *quadratic = gluNewQuadric();
   gluQuadricNormals(quadratic, GLU_SMOOTH);
-
-  // Materiais
-  GLfloat difusoBraco[] = {0.7f, 0.7f, 0.7f, 1.0f};
-  GLfloat ambienteBraco[] = {0.4f, 0.4f, 0.4f, 1.0f};
-  GLfloat especularBraco[] = {0.4f, 0.4f, 0.4f, 1.0f};
-
-  GLfloat difusoJunta[] = {0.4f, 0.4f, 0.4f, 1.0f};
-  GLfloat ambienteJunta[] = {0.15f, 0.15f, 0.15f, 1.0f};
-  GLfloat especularJunta[] = {0.1f, 0.1f, 0.1f, 1.0f};
-
-  GLfloat difusoDedos[] = {0.1f, 0.1f, 0.1f, 1.0f};
-  GLfloat ambienteDedos[] = {0.05f, 0.05f, 0.05f, 1.0f};
-  GLfloat especularDedos[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
   glPushMatrix();
     // Base da garra
@@ -483,10 +489,6 @@ void inicializa() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
-    GLfloat luzAmbiente[] = {0.2f, 0.2f, 0.2f, 1.0f};
-    GLfloat luzDifusa[]   = {1.0f, 1.0f, 1.0f, 1.0f};
-    GLfloat posicaoLuz[]  = {10.0f, 10.0f, 10.0f, 1.0f};
-
     glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
     glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz);
@@ -504,7 +506,7 @@ void display() {
 
   // camera
   gluLookAt(camX, camY, camZ, // posicao da camera
-            0.0, 0.0, 0.0,    // ponto alvo da camera
+            0.0, 1.5, 0.0,    // ponto alvo da camera
             0.0, 1.0, 0.0);   // rotacao da camera
 
   if (sombraTipo == 0)
@@ -595,26 +597,75 @@ void mousePressionado(int botao, int estado, int x, int y) {
 }
 
 void menu(int opcao) {
-    switch(opcao) {
-        case 1: // Reiniciar articulações
-            anguloArticulacao1X = 0.0;
-            anguloArticulacao1Y = 0.0;
-            anguloArticulacao2X = 0.0;
-            anguloArticulacao2Y = 0.0;
-            anguloArticulacao3X = 0.0;
-            anguloArticulacao3Y = 0.0;
-            anguloPegada = 0.0;
-            objetoPegado = false;
-            pegar = false;
-            break;
-    }
-    glutPostRedisplay();
+  switch(opcao) {
+    case 1: // Reiniciar articulações
+      anguloArticulacao1X = 0.0;
+      anguloArticulacao1Y = 0.0;
+      anguloArticulacao2X = 0.0;
+      anguloArticulacao2Y = 0.0;
+      anguloArticulacao3X = 0.0;
+      anguloArticulacao3Y = 0.0;
+      anguloPegada = 0.0;
+      objetoPegado = false;
+      pegar = false;
+      break;
+    case 2:
+      luzAmbiente[0] = 0.5f;
+      luzAmbiente[1] = 0.5f;
+      luzAmbiente[2] = 0.5f;
+      luzDifusa[0]   = 1.0f;
+      luzDifusa[1]   = 1.0f;
+      luzDifusa[2]   = 1.0f;
+      glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+      glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
+      break;
+    case 3:
+      luzAmbiente[0] = 0.2f;
+      luzAmbiente[1] = 0.2f;
+      luzAmbiente[2] = 0.2f;
+      luzDifusa[0]   = 0.6f;
+      luzDifusa[1]   = 0.6f;
+      luzDifusa[2]   = 0.6f;
+      glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+      glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
+      break;
+    case 4:
+      luzAmbiente[0] = 0.01f;
+      luzAmbiente[1] = 0.01f;
+      luzAmbiente[2] = 0.01f;
+      luzDifusa[0]   = 0.3f;
+      luzDifusa[1]   = 0.3f;
+      luzDifusa[2]   = 0.3f;
+      glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+      glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
+      break;
+    case 5:
+      ambienteBraco[0] = 0.6f;
+      ambienteBraco[1] = 0.6f;
+      ambienteBraco[2] = 0.6f;
+      break;
+    case 6:
+      ambienteBraco[0] = 0.0f;
+      ambienteBraco[1] = 0.0f;
+      ambienteBraco[2] = 1.0f;
+      break;
+    case 7:
+      posicaoLuz[1] = 200.0f;
+      break;
+  }
+  glutPostRedisplay();
 }
 
 void criarMenu() {
     // Cria o menu e associa a função callback
     glutCreateMenu(menu);
     glutAddMenuEntry("Reiniciar articulacoes", 1);
+    glutAddMenuEntry("Luz forte (default)", 2);
+    glutAddMenuEntry("Luz media", 3);
+    glutAddMenuEntry("Luz fraca", 4);
+    glutAddMenuEntry("Braco branco (default)", 5);
+    glutAddMenuEntry("Braco azul", 6);
+    glutAddMenuEntry("teste", 7);
 
     // Associa o menu ao botão direito do mouse
     glutAttachMenu(GLUT_MIDDLE_BUTTON);
