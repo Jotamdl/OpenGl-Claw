@@ -415,6 +415,7 @@ void desenhaQuarto() {
     carregarTextura("textures/parede.jpg", 1);
     carregarTextura("textures/chao.jpg", 2);
     carregarTextura("textures/teto.jpg", 3);
+    carregarTextura("textures/mengao.jpeg", 4);
     // Ajustar modo para a textura não escurecer
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
   }
@@ -476,6 +477,18 @@ void desenhaQuarto() {
       glTexCoord2f(0.0, 1.0); glVertex3f(-size, -0.6, size);
     glEnd();    
     
+    glPushMatrix();
+      glRotatef(180.0, 0.0, 1.0, 0.0);
+      // easter-egg
+      if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[4]);
+      glBegin(GL_QUADS);
+        glTexCoord2f(0.0, 0.0); glVertex3f(-0.7, -0.61, -0.7);
+        glTexCoord2f(1.0, 0.0); glVertex3f(0.7, -0.61, -0.7);
+        glTexCoord2f(1.0, 1.0); glVertex3f(0.7, -0.61, 0.7);
+        glTexCoord2f(0.0, 1.0); glVertex3f(-0.7, -0.61, 0.7);
+      glEnd();    
+    glPopMatrix();
+
   glPopMatrix();
   
   if (loadHouseTex) glDisable(GL_TEXTURE_2D);
@@ -650,7 +663,9 @@ void menu(int opcao) {
       ambienteBraco[2] = 1.0f;
       break;
     case 7:
-      posicaoLuz[1] = 200.0f;
+      ambienteBraco[0] = 0.0f;
+      ambienteBraco[1] = 1.0f;
+      ambienteBraco[2] = 0.0f;
       break;
   }
   glutPostRedisplay();
@@ -665,7 +680,7 @@ void criarMenu() {
     glutAddMenuEntry("Luz fraca", 4);
     glutAddMenuEntry("Braco branco (default)", 5);
     glutAddMenuEntry("Braco azul", 6);
-    glutAddMenuEntry("teste", 7);
+    glutAddMenuEntry("Braco verde", 7);
 
     // Associa o menu ao botão direito do mouse
     glutAttachMenu(GLUT_MIDDLE_BUTTON);
