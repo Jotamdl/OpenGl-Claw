@@ -42,7 +42,7 @@ bool objetoPegado = false;
 
 // variavel para carregar texturas
 GLuint idsTextura[10];
-bool loadHouseTex = false;
+bool loadHouseTex = true;
 
 void desenhaCirculo(float raio)
 {
@@ -366,14 +366,14 @@ void desenhaMesa() {
 
     // Pés da mesa
     float tamPé = 0.2f; 
-    float alturaPé = 1.0f;
+    float alturaPé = 1.65f;
 
     for (float x : std::initializer_list<float>{-1.7f, 1.7f}) {
       for (float z : std::initializer_list<float>{-0.8f, 0.8f}) {
         glPushMatrix();
-        glTranslatef(x, alturaPé / 2, z);
-        glScalef(tamPé, alturaPé, tamPé);
-        solidCube(1.0f);
+          glTranslatef(x, 0.23, z);
+          glScalef(tamPé, alturaPé, tamPé);
+          solidCube(1.0f);
         glPopMatrix();
       }
     }
@@ -403,73 +403,76 @@ void desenhaMesa() {
 }
 
 void desenhaQuarto() {
-  // Configurando texturas
-  glEnable(GL_TEXTURE_2D);
-  carregarTextura("textures/parede.jpg", 1);
-  carregarTextura("textures/chao.jpg", 2);
-  carregarTextura("textures/teto.jpg", 3);
-  // Ajustar modo para a textura não escurecer
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-  float size = 5.0;
+  if (loadHouseTex) {
+    // Configurando texturas
+    glEnable(GL_TEXTURE_2D);
+    carregarTextura("textures/parede.jpg", 1);
+    carregarTextura("textures/chao.jpg", 2);
+    carregarTextura("textures/teto.jpg", 3);
+    // Ajustar modo para a textura não escurecer
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+  }
+  else glDisable(GL_TEXTURE_2D);
+  
+  float size = 15.0;
   glPushMatrix();
     // face frontal
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[1]);
     glBegin(GL_QUADS);
-      glTexCoord2f(0.0, 0.0); glVertex3f(-size, -size, size);
-      glTexCoord2f(1.0, 0.0); glVertex3f(size, -size, size);
-      glTexCoord2f(1.0, 1.0); glVertex3f(size, size, size);
-      glTexCoord2f(0.0, 1.0); glVertex3f(-size, size, size);
+      glTexCoord2f(0.0, 0.0); glVertex3f(-size, -0.6, size);
+      glTexCoord2f(1.0, 0.0); glVertex3f(size, -0.6, size);
+      glTexCoord2f(1.0, 1.0); glVertex3f(size, 10, size);
+      glTexCoord2f(0.0, 1.0); glVertex3f(-size, 10, size);
     glEnd();    
 
     // face traseira
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[1]);
     glBegin(GL_QUADS);
-      glTexCoord2f(0.0, 0.0); glVertex3f(-size, -size, -size);
-      glTexCoord2f(1.0, 0.0); glVertex3f(size, -size, -size);
-      glTexCoord2f(1.0, 1.0); glVertex3f(size, size, -size);
-      glTexCoord2f(0.0, 1.0); glVertex3f(-size, size, -size);
+      glTexCoord2f(0.0, 0.0); glVertex3f(-size, -0.6, -size);
+      glTexCoord2f(1.0, 0.0); glVertex3f(size, -0.6, -size);
+      glTexCoord2f(1.0, 1.0); glVertex3f(size, 10, -size);
+      glTexCoord2f(0.0, 1.0); glVertex3f(-size, 10, -size);
     glEnd();    
 
     // face superior
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[3]);
     glBegin(GL_QUADS);
-      glTexCoord2f(0.0, 0.0); glVertex3f(-size, size, -size);
-      glTexCoord2f(1.0, 0.0); glVertex3f(size, size, -size);
-      glTexCoord2f(1.0, 1.0); glVertex3f(size, size, size);
-      glTexCoord2f(0.0, 1.0); glVertex3f(-size, size, size);
+      glTexCoord2f(0.0, 0.0); glVertex3f(-size, 10, -size);
+      glTexCoord2f(1.0, 0.0); glVertex3f(size, 10, -size);
+      glTexCoord2f(1.0, 1.0); glVertex3f(size, 10, size);
+      glTexCoord2f(0.0, 1.0); glVertex3f(-size, 10, size);
     glEnd();    
 
     // face inferior
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[2]);
     glBegin(GL_QUADS);
-      glTexCoord2f(0.0, 0.0); glVertex3f(-size, -size, -size);
-      glTexCoord2f(1.0, 0.0); glVertex3f(size, -size, -size);
-      glTexCoord2f(1.0, 1.0); glVertex3f(size, -size, size);
-      glTexCoord2f(0.0, 1.0); glVertex3f(-size, -size, size);
+      glTexCoord2f(0.0, 0.0); glVertex3f(-size, -0.6, -size);
+      glTexCoord2f(1.0, 0.0); glVertex3f(size, -0.6, -size);
+      glTexCoord2f(1.0, 1.0); glVertex3f(size, -0.6, size);
+      glTexCoord2f(0.0, 1.0); glVertex3f(-size, -0.6, size);
     glEnd();    
 
     // face direita
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[1]);
     glBegin(GL_QUADS);
-      glTexCoord2f(0.0, 0.0); glVertex3f(size, -size, -size);
-      glTexCoord2f(1.0, 0.0); glVertex3f(size, size, -size);
-      glTexCoord2f(1.0, 1.0); glVertex3f(size, size, size);
-      glTexCoord2f(0.0, 1.0); glVertex3f(size, -size, size);
+      glTexCoord2f(0.0, 0.0); glVertex3f(size, -0.6, -size);
+      glTexCoord2f(1.0, 0.0); glVertex3f(size, 10, -size);
+      glTexCoord2f(1.0, 1.0); glVertex3f(size, 10, size);
+      glTexCoord2f(0.0, 1.0); glVertex3f(size, -0.6, size);
     glEnd();    
 
     // face esquerda
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[1]);
     glBegin(GL_QUADS);
-      glTexCoord2f(0.0, 0.0); glVertex3f(-size, -size, -size);
-      glTexCoord2f(1.0, 0.0); glVertex3f(-size, size, -size);
-      glTexCoord2f(1.0, 1.0); glVertex3f(-size, size, size);
-      glTexCoord2f(0.0, 1.0); glVertex3f(-size, -size, size);
+      glTexCoord2f(0.0, 0.0); glVertex3f(-size, -0.6, -size);
+      glTexCoord2f(1.0, 0.0); glVertex3f(-size, 10, -size);
+      glTexCoord2f(1.0, 1.0); glVertex3f(-size, 10, size);
+      glTexCoord2f(0.0, 1.0); glVertex3f(-size, -0.6, size);
     glEnd();    
     
   glPopMatrix();
   
-  glDisable(GL_TEXTURE_2D);
+  if (loadHouseTex) glDisable(GL_TEXTURE_2D);
 }
 
 void inicializa() {
@@ -492,25 +495,30 @@ void inicializa() {
 }
 
 void display() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
 
-    float camX = cameraDistance * cos(cameraAngleHorizontal);
-    float camY = cameraDistance * sin(cameraAngleVertical);
-    float camZ = cameraDistance * sin(cameraAngleHorizontal);
+  float camX = cameraDistance * sinf(cameraAngleHorizontal * M_PI / 180.0f) * cosf(cameraAngleVertical * M_PI / 180.0f);
+  float camZ = cameraDistance * cosf(cameraAngleHorizontal * M_PI / 180.0f) * cosf(cameraAngleVertical * M_PI / 180.0f);
+  float camY = cameraDistance * sinf(cameraAngleVertical * M_PI / 180.0f);
 
-    // camera
-    gluLookAt(camX, camY, camZ, // posicao da camera
-              0.0, 0.0, 0.0,    // ponto alvo da camera
-              0.0, 1.0, 0.0);   // rotacao da camera
+  // camera
+  gluLookAt(camX, camY, camZ, // posicao da camera
+            0.0, 0.0, 0.0,    // ponto alvo da camera
+            0.0, 1.0, 0.0);   // rotacao da camera
 
-    glPushMatrix();
+  if (sombraTipo == 0)
+    glShadeModel(GL_FLAT);  // sombreamento plano (flat)
 
+  if (sombraTipo == 1)
+    glShadeModel(GL_SMOOTH);  // sombreamento suave (Gouraud)
+
+  glPushMatrix();
     desenhaQuarto();
     desenhaMesa();
-    glPopMatrix();
+  glPopMatrix();
 
-    glutSwapBuffers();
+  glutSwapBuffers();
 }
 
 void reshape(int w, int h) {
@@ -526,10 +534,10 @@ void teclado(unsigned char tecla, int x, int y) {
     const float incremento = 0.1f; 
 
     switch (tecla) {
-        case 'w': cameraAngleVertical  += incremento; break;   //
-        case 's': cameraAngleVertical  -= incremento; break;   //
-        case 'a': cameraAngleHorizontal  += incremento; break; //
-        case 'd': cameraAngleHorizontal  -= incremento; break; //
+        case 'w': cameraAngleVertical  += incremento * 20; break;   //
+        case 's': cameraAngleVertical  -= incremento * 20; break;   //
+        case 'a': cameraAngleHorizontal  += incremento * 20; break; //
+        case 'd': cameraAngleHorizontal  -= incremento * 20; break; //
         case 'q': cameraDistance += incremento; break;         //
         case 'e': cameraDistance -= incremento; break;         //
     }
@@ -573,6 +581,43 @@ void tecladoEspecial(int tecla, int x, int y) {
     }
 
     glutPostRedisplay(); 
+}
+
+void mousePressionado(int botao, int estado, int x, int y) {
+  if (estado == GLUT_DOWN) {
+    if (botao == GLUT_LEFT_BUTTON)
+      loadHouseTex = true;
+    else if (botao == GLUT_RIGHT_BUTTON)
+      loadHouseTex = false;
+    }
+
+ glutPostRedisplay();
+}
+
+void menu(int opcao) {
+    switch(opcao) {
+        case 1: // Reiniciar articulações
+            anguloArticulacao1X = 0.0;
+            anguloArticulacao1Y = 0.0;
+            anguloArticulacao2X = 0.0;
+            anguloArticulacao2Y = 0.0;
+            anguloArticulacao3X = 0.0;
+            anguloArticulacao3Y = 0.0;
+            anguloPegada = 0.0;
+            objetoPegado = false;
+            pegar = false;
+            break;
+    }
+    glutPostRedisplay();
+}
+
+void criarMenu() {
+    // Cria o menu e associa a função callback
+    glutCreateMenu(menu);
+    glutAddMenuEntry("Reiniciar articulacoes", 1);
+
+    // Associa o menu ao botão direito do mouse
+    glutAttachMenu(GLUT_MIDDLE_BUTTON);
 }
 
 void atualiza(int valor) {
@@ -636,7 +681,10 @@ int main(int argc, char** argv) {
     glutReshapeFunc(reshape);
     glutKeyboardFunc(teclado);
     glutSpecialFunc(tecladoEspecial);
+    glutMouseFunc(mousePressionado);
     glutTimerFunc(1000, atualiza, 0);
+
+    criarMenu();
 
     glutMainLoop();
     return 0;
