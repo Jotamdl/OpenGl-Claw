@@ -50,7 +50,7 @@ bool objetoPegado = false;
 GLuint idsTextura[10];
 bool loadHouseTex = true;
 
-// Materiais
+// Materiais itens 
 GLfloat difusoBraco[]    = {0.7f, 0.7f, 0.7f, 1.0f};
 GLfloat ambienteBraco[]  = {0.6f, 0.6f, 0.6f, 1.0f};
 GLfloat especularBraco[] = {0.4f, 0.4f, 0.4f, 1.0f};
@@ -62,6 +62,19 @@ GLfloat especularJunta[] = {0.1f, 0.1f, 0.1f, 1.0f};
 GLfloat difusoDedos[]    = {0.1f, 0.1f, 0.1f, 1.0f};
 GLfloat ambienteDedos[]  = {0.05f, 0.05f, 0.05f, 1.0f};
 GLfloat especularDedos[] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+// Materiais quarto 
+GLfloat difusoParede[]    = {0.7f, 0.3f, 0.0f, 1.0f};
+GLfloat ambienteParede[]  = {0.6f, 0.2f, 0.0f, 1.0f};
+GLfloat especularParede[] = {0.4f, 0.1f, 0.1f, 1.0f};
+
+GLfloat difusoChao[]    = {0.2f, 0.2f, 0.2f, 1.0f};
+GLfloat ambienteChao[]  = {0.3f, 0.3f, 0.3f, 1.0f};
+GLfloat especularChao[] = {0.1f, 0.1f, 0.1f, 1.0f};
+
+GLfloat difusoTeto[]    = {0.3f, 0.3f, 0.3f, 1.0f};
+GLfloat ambienteTeto[]  = {0.4f, 0.4f, 0.4f, 1.0f};
+GLfloat especularTeto[] = {0.1f, 0.1f, 0.1f, 1.0f};
 
 void desenhaCirculo(float raio)
 {
@@ -425,6 +438,11 @@ void desenhaQuarto() {
   glPushMatrix();
     // face frontal
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[1]);
+    else {
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoParede);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteParede);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularParede);
+    }
     glBegin(GL_QUADS);
       glTexCoord2f(0.0, 0.0); glVertex3f(-size, -0.6, size);
       glTexCoord2f(1.0, 0.0); glVertex3f(size, -0.6, size);
@@ -434,6 +452,11 @@ void desenhaQuarto() {
 
     // face traseira
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[1]);
+    else {
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoParede);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteParede);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularParede);
+    }
     glBegin(GL_QUADS);
       glTexCoord2f(0.0, 0.0); glVertex3f(-size, -0.6, -size);
       glTexCoord2f(1.0, 0.0); glVertex3f(size, -0.6, -size);
@@ -443,6 +466,11 @@ void desenhaQuarto() {
 
     // face superior
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[3]);
+    else {
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoTeto);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteTeto);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularTeto);
+    }
     glBegin(GL_QUADS);
       glTexCoord2f(0.0, 0.0); glVertex3f(-size, 10, -size);
       glTexCoord2f(1.0, 0.0); glVertex3f(size, 10, -size);
@@ -452,7 +480,13 @@ void desenhaQuarto() {
 
     // face inferior
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[2]);
+    else {
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoChao);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteChao);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularChao);
+    }
     glBegin(GL_QUADS);
+    
       glTexCoord2f(0.0, 0.0); glVertex3f(-size, -0.6, -size);
       glTexCoord2f(1.0, 0.0); glVertex3f(size, -0.6, -size);
       glTexCoord2f(1.0, 1.0); glVertex3f(size, -0.6, size);
@@ -461,6 +495,11 @@ void desenhaQuarto() {
 
     // face direita
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[1]);
+    else {
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoParede);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteParede);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularParede);
+    }
     glBegin(GL_QUADS);
       glTexCoord2f(0.0, 0.0); glVertex3f(size, -0.6, -size);
       glTexCoord2f(1.0, 0.0); glVertex3f(size, 10, -size);
@@ -470,6 +509,11 @@ void desenhaQuarto() {
 
     // face esquerda
     if (loadHouseTex) glBindTexture(GL_TEXTURE_2D, idsTextura[1]);
+    else {
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, difusoParede);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambienteParede);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, especularParede);
+    }
     glBegin(GL_QUADS);
       glTexCoord2f(0.0, 0.0); glVertex3f(-size, -0.6, -size);
       glTexCoord2f(1.0, 0.0); glVertex3f(-size, 10, -size);
